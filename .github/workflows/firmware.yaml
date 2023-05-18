@@ -14,11 +14,12 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
-            components: clippy, espup, rustfmt
+            components: clippy, rustfmt
             override: true
-      - name: Install toolchain
+      - name: Install ESP toolchain
         run: |
-          espup install
+          cargo install espup
+          espup install --targets esp32
           source $HOME/export-esp.sh
       - name: Run clippy
         working-directory: firmware
@@ -33,11 +34,11 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: nightly
-            components: espup
             override: true
-      - name: Install toolchain
+      - name: Install ESP toolchain
         run: |
-          espup install
+          cargo install espup
+          espup install --targets esp32
           source $HOME/export-esp.sh
       - name: Build
         working-directory: firmware
