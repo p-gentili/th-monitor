@@ -1,0 +1,44 @@
+name: Firmware linting and building
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - firmware/**
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            components: clippy, espup, rustfmt
+            override: true
+      - name: Install toolchain
+        run: |
+          espup install
+          source $HOME/export-esp.sh
+      - name: Run clippy
+        working-directory: firmware
+        run: cargo clippy -- -D warnings
+      - name: Check formatting
+        run: cargo fmt -- --files-with-diff --check
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            components: espup
+            override: true
+      - name: Install toolchain
+        run: |
+          espup install
+          source $HOME/export-esp.sh
+      - name: Build
+        working-directory: firmware
+        run: cargo build
