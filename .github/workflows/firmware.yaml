@@ -1,0 +1,38 @@
+name: Firmware linting and building
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - firmware/**
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: esp-rs/xtensa-toolchain@v1.5
+        with:
+          default: true
+          buildtargets: esp32
+          ldproxy: false
+          components: clippy, rustfmt
+      - name: Run clippy
+        working-directory: firmware
+        run: cargo clippy -- -D warnings
+      - name: Check formatting
+        working-directory: firmware
+        run: cargo fmt -- --files-with-diff --check
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: esp-rs/xtensa-toolchain@v1.5
+        with:
+          default: true
+          buildtargets: esp32
+          ldproxy: false
+      - name: Build
+        working-directory: firmware
+        run: cargo build
